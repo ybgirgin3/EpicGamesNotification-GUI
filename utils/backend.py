@@ -1,26 +1,53 @@
 from typing import DefaultDict, NamedTuple
 import logging
 
-# from epicgamesnotification.commons._mail import _mail
 from epicgamesnotification.commons._save import _save
-from epicgamesnotification.commons._scrape import _scrape
 from epicgamesnotification.utils.utils import open_file
+from epicgamesnotification.apps.scrape.tasks import Scraper
 
-from utils.utils import BackendState
+from utils.utils import BackendState, Retailers, SaveOrNot, SendMail
+
+scraper = Scraper()
 
 
 def backend(state: BackendState):
     # collect vars
-    retailer = type(state.retailer)
-    print(retailer.value)
-    # retailer = state.retailer
-    # print("retailer", retailer)
-    # save_or_not = state.save_or_not
-    # send_mail: bool = state.send_mail
+    # print(state)
+    # print(state.retailer_id, state.save_or_not, state.send_mail)
 
-    # logging.info("selected retailer in backend", retailer)
-    # logging.info("selected retailer in backend", save_or_not)
-    # logging.info("selected retailer in backend", send_mail)
+    """
+    Scrape ederken backend tarafina backend tarafina;
+        • retailer_id
+        • save_or_not
+        • send_mail
+
+    """
+    print('raw state: ', state, list(SaveOrNot))
+
+    _state = {
+        # 'save': True if list(SaveOrNot)[state.save_or_not].value in (0, 1) else False,
+        'open': True if list(SaveOrNot)[state.save_or_not].value in (0, 2) else False,
+        'send_mail': True 
+    }
+
 
     # scrape data
-    # data = _scrape._scrape()
+    # TODO: scrape kismi su an icin yalnizca epic icin tanimli oldugundan dolayi
+    # direkt olarak scrape islemi yapabiliriz
+    try:
+        # scrape data
+        data = scraper.scrape()
+
+        # after scrape data if save?
+        # if _state.get('save'):
+        is_saved, saved_path_or_error = _save._save(data)
+        print('saved?: ', is_saved, saved_path_or_error)
+        if _state.get('open'):
+            open_file(saved_path_or_error)
+        if _state.get('send_mail'):
+            print('mail sent')
+
+
+    except Exception as e:
+        pass
+
