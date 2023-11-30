@@ -6,14 +6,12 @@ from customtkinter import (
     CTkOptionMenu,
     StringVar,
 )
-from collections import namedtuple, defaultdict
-from typing import Any, DefaultDict, Union
-import dataclasses
-from dataclasses import asdict
+from typing import Any, Union
 
 # backend
 from utils.backend import backend
 from utils.utils import *
+from dacite import from_dict
 
 customtkinter.set_appearance_mode("System")
 customtkinter.set_default_color_theme("blue")
@@ -145,6 +143,7 @@ class EpicGamesGUI:
     @classmethod
     def _button(cls):
         print(cls.bs)
+        backend(state=from_dict(data_class=BackendState, data=cls.bs))
 
     @classmethod
     def _retailer_optionmenu_callback(cls, choice):
