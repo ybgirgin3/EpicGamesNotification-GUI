@@ -1,4 +1,5 @@
 import customtkinter
+
 from customtkinter import (
     CTkButton,
     CTkCheckBox,
@@ -7,6 +8,8 @@ from customtkinter import (
 )
 from collections import namedtuple, defaultdict
 from typing import Any, DefaultDict, Union
+import dataclasses
+from dataclasses import asdict
 
 # backend
 from utils.backend import backend
@@ -19,9 +22,8 @@ customtkinter.set_default_color_theme("blue")
 class EpicGamesGUI:
     app = customtkinter.CTk()
 
-    # state: DefaultDict = defaultdict(lambda: None)
+    bs = BackendState().dict()
 
-    # optionButtonName: str = None
     # app.geometry("640x480")
 
     # DEFINITIONS
@@ -39,51 +41,51 @@ class EpicGamesGUI:
                 self.option_menu(
                     # ["EpicGames", "Steam(Experimental)"],
                     [r.name for r in Retailers],
-                    DefinedOptionMenu(
+                    OptionMenu(
                         relx=3,
                         rely=3,
                         anchor="w",
                     ),
                 ),
-                DefinedGrid(0, 0, 10, 10),
+                Grid(0, 0, 10, 10),
             ),
             # save, open direct
             self.grid(
                 self.option_menu(
                     # ["Save and Open", "Just Save"],
                     [s.name for s in SaveOrNot],
-                    DefinedOptionMenu(
+                    OptionMenu(
                         relx=3,
                         rely=3,
                         anchor="w",
                     ),
                 ),
-                DefinedGrid(1, 0, 10, 10),
+                Grid(1, 0, 10, 10),
             ),
             # send mail or not
             self.grid(
                 self.checkbox(
-                    DefinedCheckBox(
+                    CheckBox(
                         text="Send Mail?",
                         command=self._checkbox_callback,
-                        onvalue="on",
-                        offvalue="off",
+                        onValue="on",
+                        offValue="off",
                         relx=3,
                         rely=3,
                         anchor="w",
                     )
                 ),
-                DefinedGrid(2, 0, 10, 10),
+                Grid(2, 0, 10, 10),
             ),
             # create button pack
             self.grid(
-                self.button(DefinedButton("CustomButton", self._button, 0.5, 0.5, "s")),
-                DefinedGrid(4, 0, 10, 10),
+                self.button(Button("CustomButton", self._button, 0.5, 0.5, "s")),
+                Grid(4, 0, 10, 10),
             ),
         )
 
     # *** WIDGET FACTORIES ***
-    def button(self, button: DefinedButton) -> CTkButton:
+    def button(self, button: Button) -> CTkButton:
         confirm_button = customtkinter.CTkButton(
             master=self.app, text=button.name, command=button.command
         )
@@ -94,7 +96,7 @@ class EpicGamesGUI:
         )
         return confirm_button
 
-    def option_menu(self, options: list, option: DefinedOptionMenu) -> CTkOptionMenu:
+    def option_menu(self, options: list, option: OptionMenu) -> CTkOptionMenu:
         defVal = StringVar(
             value=options[0] if len(options) else "No retailer Found to Select"
         )
@@ -115,15 +117,15 @@ class EpicGamesGUI:
         )
         return optionMenu
 
-    def checkbox(self, vars: DefinedCheckBox) -> CTkCheckBox:
+    def checkbox(self, vars: CheckBox) -> CTkCheckBox:
         check_var = StringVar(value="off")
         checkboxButton = CTkCheckBox(
             master=self.app,
             text=vars.text,
             variable=check_var,
             command=lambda: vars.command(check_var),
-            onvalue=vars.onvalue,
-            offvalue=vars.offvalue,
+            onvalue=vars.onValue,
+            offvalue=vars.offValue,
         )
 
         checkboxButton.place(
@@ -134,52 +136,36 @@ class EpicGamesGUI:
 
         return checkboxButton
 
-    def pack(self, obj: Union[CTkButton, CTkOptionMenu, Any], pack: DefinedPack):
-        return obj.pack(padx=pack.padx, pady=pack.pady)
-
-    def grid(self, obj: Union[CTkButton, CTkOptionMenu, Any], _grid: DefinedGrid):
+    def grid(self, obj: Union[CTkButton, CTkOptionMenu, Any], _grid: Grid):
         return obj.grid(
-            row=_grid.row, column=_grid.column, padx=_grid.padx, pady=_grid.pady
+            row=_grid.row, column=_grid.column, padx=_grid.padX, pady=_grid.padY
         )
 
     # *** WIDGET CALLBACKS ***
     @classmethod
     def _button(cls):
-        print(BackendState()._asdict)
-        # backend(BackendState)
+        print(cls.bs)
 
     @classmethod
     def _retailer_optionmenu_callback(cls, choice):
-        # print(cls.create_app)
-        print([e for e in Retailers])
-        print("choise in retailer menu", choice)
-
-        # find choice number for enum
-        # retailer = Retailers.choice
         retailer_value = getattr(Retailers, choice).value
-        print("retailer_value:", retailer_value)
-
-        backendState = BackendState._replace(retailer=retailer_value)
-        # print(BackendState.__asdict__)
-        # cls.state["retailer"] = choice
+        cls.bs["retailer_id"] = retailer_value
+        print("bs after update", cls.bs)
 
     @classmethod
     def _save_optionmenu_callback(cls, choice):
-        # print(cls.create_app)
-        print([e for e in SaveOrNot])
-        print("choise in save menu", choice)
         save_value = getattr(SaveOrNot, choice).value
-        backendState = BackendState._replace(save_or_not=save_value)
-        # cls.state["save_or_not"] = choice
+        print("save value", save_value)
+        cls.bs["save_or_not"] = save_value
+        print("bs after update", cls.bs)
 
     @classmethod
     def _checkbox_callback(cls, val):
         _send_mail = "TRUE" if val.get() == "on" else "FALSE"
-        print("_send mail right before the set value to the state", _send_mail)
         check_box_val = getattr(SendMail, _send_mail).value
         print("checkbox", check_box_val)
-        backendState = BackendState._replace(send_mail=_send_mail)
-        # cls.state["send_mail"] = _send_mail
+        cls.bs["send_mail"] = check_box_val
+        print("bs after update", cls.bs)
 
 
 if __name__ == "__main__":
