@@ -4,5 +4,6 @@ epicgamesnotification@ git+ssh://git@github.com/ybgirgin3/EpicGamesNotification.
 
 customtkinter
 packaging # ?
+dacite
 
 
