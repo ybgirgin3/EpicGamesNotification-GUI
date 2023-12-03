@@ -10,7 +10,7 @@ from typing import Any, Union
 
 # backend
 from utils.backend import backend
-from utils.utils import *
+from utils.interfaces import *
 from dacite import from_dict
 
 customtkinter.set_appearance_mode("System")
@@ -165,6 +165,7 @@ class EpicGamesGUI:
         print("checkbox", check_box_val)
         cls.bs["send_mail"] = check_box_val
         print("bs after update", cls.bs)
+
 
 
 if __name__ == "__main__":
